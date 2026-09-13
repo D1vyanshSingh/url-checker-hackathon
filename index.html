@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1f2937;
+  }
+
+  .game {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    width: 340px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
+    color: #111827;
+  }
+
+  .status {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+    height: 24px;
+    margin-bottom: 14px;
+    color: #4b5563;
+  }
+
+  .status .turn { color: #6366f1; font-weight: 700; }
+  .status .winner { color: #10b981; font-weight: 700; }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .cell {
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 12px;
+    background: #f3f4f6;
+    font-size: 42px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    color: #111827;
+    line-height: 1;
+  }
+
+  .cell:hover:not(:disabled) {
+    background: #e5e7eb;
+  }
+
+  .cell:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  .cell:disabled {
+    cursor: default;
+  }
+
+  .cell.x { color: #6366f1; }
+  .cell.o { color: #f59e0b; }
+
+  .cell.win {
+    background: #d1fae5;
+    animation: pop 0.3s ease;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  .scoreboard {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .score {
+    text-align: center;
+    flex: 1;
+  }
+
+  .score .label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+
+  .score .value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  .reset {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: #6366f1;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .reset:hover { background: #4f46e5; }
+</style>
+</head>
+<body>
+  <div class="game">
+    <h1>Tic Tac Toe</h1>
+    <div class="status" id="status"></div>
+    <div class="board" id="board"></div>
+    <div class="scoreboard">
+      <div class="score">
+        <div class="label">X wins</div>
+        <div class="value" id="scoreX">0</div>
+      </div>
+      <div class="score">
+        <div class="label">Draws</div>
+        <div class="value" id="scoreDraw">0</div>
+      </div>
+      <div class="score">
+        <div class="label">O wins</div>
+        <div class="value" id="scoreO">0</div>
+      </div>
+    </div>
+    <button class="reset" id="resetBtn">New Round</button>
+  </div>
+
+<script>
+  const WIN_LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // cols
+    [0, 4, 8], [2, 4, 6]             // diagonals
+  ];
+
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const resetBtn = document.getElementById('resetBtn');
+  const scoreEls = { X: document.getElementById('scoreX'), O: document.getElementById('scoreO'), draw: document.getElementById('scoreDraw') };
+
+  let board, current, gameOver, winLine, scores = { X: 0, O: 0, draw: 0 };
+
+  function init() {
+    board = Array(9).fill(null);
+    current = 'X';
+    gameOver = false;
+    winLine = null;
+    boardEl.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement('button');
+      cell.className = 'cell';
+      cell.dataset.index = i;
+      cell.addEventListener('click', onCellClick);
+      boardEl.appendChild(cell);
+    }
+    render();
+  }
+
+  function onCellClick(e) {
+    const i = Number(e.target.dataset.index);
+    if (gameOver || board[i]) return;
+    board[i] = current;
+    checkResult();
+    render();
+  }
+
+  function checkResult() {
+    for (const [a, b, c] of WIN_LINES) {
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        gameOver = true;
+        winLine = [a, b, c];
+        scores[board[a]]++;
+        return;
+      }
+    }
+    if (board.every(Boolean)) {
+      gameOver = true;
+      scores.draw++;
+      return;
+    }
+    current = current === 'X' ? 'O' : 'X';
+  }
+
+  function render() {
+    [...boardEl.children].forEach((cell, i) => {
+      cell.textContent = board[i] || '';
+      cell.classList.toggle('x', board[i] === 'X');
+      cell.classList.toggle('o', board[i] === 'O');
+      cell.disabled = gameOver || Boolean(board[i]);
+      cell.classList.toggle('win', gameOver && winLine && winLine.includes(i));
+    });
+
+    if (gameOver && winLine) {
+      statusEl.innerHTML = `<span class="winner">${board[winLine[0]]} wins! 🎉</span>`;
+    } else if (gameOver) {
+      statusEl.innerHTML = `<span class="winner">It's a draw!</span>`;
+    } else {
+      statusEl.innerHTML = `<span class="turn">${current}</span>'s turn`;
+    }
+
+    scoreEls.X.textContent = scores.X;
+    scoreEls.O.textContent = scores.O;
+    scoreEls.draw.textContent = scores.draw;
+  }
+
+  resetBtn.addEventListener('click', init);
+
+  init();
+</script>
+</body>
+</html>

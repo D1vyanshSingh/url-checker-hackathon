@@ -1,0 +1,14 @@
+{
+  "name": "url-safety-checker-backend",
+  "version": "1.0.0",
+  "description": "Heuristic URL phishing risk assessment API (zero dependencies)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

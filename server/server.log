@@ -1,0 +1,2 @@
+URL Safety Checker API listening on http://localhost:3000
+Try: curl "http://localhost:3000/api/check?url=http://paypal.com.verify-login.tk/signin"
