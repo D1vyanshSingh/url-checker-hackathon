@@ -1,244 +1,838 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tic Tac Toe</title>
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #1f2937;
-  }
-
-  .game {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 32px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-    width: 340px;
-  }
-
-  h1 {
-    font-size: 22px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 16px;
-    color: #111827;
-  }
-
-  .status {
-    text-align: center;
-    font-size: 15px;
-    font-weight: 500;
-    height: 24px;
-    margin-bottom: 14px;
-    color: #4b5563;
-  }
-
-  .status .turn { color: #6366f1; font-weight: 700; }
-  .status .winner { color: #10b981; font-weight: 700; }
-
-  .board {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 18px;
-  }
-
-  .cell {
-    aspect-ratio: 1;
-    border: none;
-    border-radius: 12px;
-    background: #f3f4f6;
-    font-size: 42px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.1s ease;
-    color: #111827;
-    line-height: 1;
-  }
-
-  .cell:hover:not(:disabled) {
-    background: #e5e7eb;
-  }
-
-  .cell:active:not(:disabled) {
-    transform: scale(0.96);
-  }
-
-  .cell:disabled {
-    cursor: default;
-  }
-
-  .cell.x { color: #6366f1; }
-  .cell.o { color: #f59e0b; }
-
-  .cell.win {
-    background: #d1fae5;
-    animation: pop 0.3s ease;
-  }
-
-  @keyframes pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-    100% { transform: scale(1); }
-  }
-
-  .scoreboard {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 18px;
-  }
-
-  .score {
-    text-align: center;
-    flex: 1;
-  }
-
-  .score .label {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #9ca3af;
-    margin-bottom: 4px;
-  }
-
-  .score .value {
-    font-size: 20px;
-    font-weight: 700;
-    color: #111827;
-  }
-
-  .reset {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 12px;
-    background: #6366f1;
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-
-  .reset:hover { background: #4f46e5; }
-</style>
-</head>
-<body>
-  <div class="game">
-    <h1>Tic Tac Toe</h1>
-    <div class="status" id="status"></div>
-    <div class="board" id="board"></div>
-    <div class="scoreboard">
-      <div class="score">
-        <div class="label">X wins</div>
-        <div class="value" id="scoreX">0</div>
-      </div>
-      <div class="score">
-        <div class="label">Draws</div>
-        <div class="value" id="scoreDraw">0</div>
-      </div>
-      <div class="score">
-        <div class="label">O wins</div>
-        <div class="value" id="scoreO">0</div>
-      </div>
-    </div>
-    <button class="reset" id="resetBtn">New Round</button>
-  </div>
-
-<script>
-  const WIN_LINES = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-    [0, 3, 6], [1, 4, 7], [2, 5, 8], // cols
-    [0, 4, 8], [2, 4, 6]             // diagonals
-  ];
-
-  const boardEl = document.getElementById('board');
-  const statusEl = document.getElementById('status');
-  const resetBtn = document.getElementById('resetBtn');
-  const scoreEls = { X: document.getElementById('scoreX'), O: document.getElementById('scoreO'), draw: document.getElementById('scoreDraw') };
-
-  let board, current, gameOver, winLine, scores = { X: 0, O: 0, draw: 0 };
-
-  function init() {
-    board = Array(9).fill(null);
-    current = 'X';
-    gameOver = false;
-    winLine = null;
-    boardEl.innerHTML = '';
-    for (let i = 0; i < 9; i++) {
-      const cell = document.createElement('button');
-      cell.className = 'cell';
-      cell.dataset.index = i;
-      cell.addEventListener('click', onCellClick);
-      boardEl.appendChild(cell);
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Safety Checker</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --card-border: #1f293d;
+      --input-bg: #1a2234;
+      --input-border: #374151;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-subtle: #6b7280;
+      
+      --safe-bg: #064e3b;
+      --safe-border: #10b981;
+      --safe-text: #6ee7b7;
+      --safe-badge: #10b981;
+      --safe-badge-text: #ffffff;
+      
+      --suspicious-bg: #450a0a;
+      --suspicious-border: #ef4444;
+      --suspicious-text: #fca5a5;
+      --suspicious-badge: #ef4444;
+      --suspicious-badge-text: #ffffff;
+      
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-focus: rgba(59, 130, 246, 0.4);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    render();
-  }
 
-  function onCellClick(e) {
-    const i = Number(e.target.dataset.index);
-    if (gameOver || board[i]) return;
-    board[i] = current;
-    checkResult();
-    render();
-  }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  function checkResult() {
-    for (const [a, b, c] of WIN_LINES) {
-      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        gameOver = true;
-        winLine = [a, b, c];
-        scores[board[a]]++;
-        return;
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    @media (max-width: 560px) {
+      .input-row {
+        flex-direction: column;
       }
     }
-    if (board.every(Boolean)) {
-      gameOver = true;
-      scores.draw++;
-      return;
-    }
-    current = current === 'X' ? 'O' : 'X';
-  }
 
-  function render() {
-    [...boardEl.children].forEach((cell, i) => {
-      cell.textContent = board[i] || '';
-      cell.classList.toggle('x', board[i] === 'X');
-      cell.classList.toggle('o', board[i] === 'O');
-      cell.disabled = gameOver || Boolean(board[i]);
-      cell.classList.toggle('win', gameOver && winLine && winLine.includes(i));
-    });
-
-    if (gameOver && winLine) {
-      statusEl.innerHTML = `<span class="winner">${board[winLine[0]]} wins! 🎉</span>`;
-    } else if (gameOver) {
-      statusEl.innerHTML = `<span class="winner">It's a draw!</span>`;
-    } else {
-      statusEl.innerHTML = `<span class="turn">${current}</span>'s turn`;
+    .url-input-wrapper {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
     }
 
-    scoreEls.X.textContent = scores.X;
-    scoreEls.O.textContent = scores.O;
-    scoreEls.draw.textContent = scores.draw;
-  }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      width: 18px;
+      height: 18px;
+      color: var(--text-subtle);
+      pointer-events: none;
+    }
 
-  resetBtn.addEventListener('click', init);
+    .url-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 13px 14px 13px 42px;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
 
-  init();
-</script>
+    .url-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-focus);
+    }
+
+    .url-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .check-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 26px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background-color 0.15s ease, transform 0.05s ease;
+      white-space: nowrap;
+    }
+
+    .check-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .check-btn:active {
+      transform: scale(0.98);
+    }
+
+    .check-btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .quick-samples {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .quick-samples-label {
+      font-size: 12px;
+      color: var(--text-subtle);
+      font-weight: 500;
+    }
+
+    .sample-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sample-chip:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    /* Status / Error Alert */
+    .alert {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+
+    .alert.visible {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+    }
+
+    /* Result Section */
+    .result-section {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .result-section.visible {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Verdict Banner */
+    .verdict-banner {
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      border-width: 2px;
+      border-style: solid;
+      transition: all 0.2s ease;
+    }
+
+    .verdict-banner.safe {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: #10b981;
+      color: var(--safe-text);
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
+    }
+
+    .verdict-banner.suspicious {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: #ef4444;
+      color: var(--suspicious-text);
+      box-shadow: 0 0 25px -5px rgba(239, 68, 68, 0.25);
+    }
+
+    .verdict-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .verdict-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .verdict-banner.safe .verdict-icon {
+      background: #10b981;
+      color: #ffffff;
+    }
+
+    .verdict-banner.suspicious .verdict-icon {
+      background: #ef4444;
+      color: #ffffff;
+    }
+
+    .verdict-label-wrap h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 2px;
+    }
+
+    .verdict-badge-text {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .verdict-banner.safe .verdict-badge-text {
+      color: #34d399;
+    }
+
+    .verdict-banner.suspicious .verdict-badge-text {
+      color: #f87171;
+    }
+
+    /* Score Box */
+    .score-box {
+      text-align: right;
+    }
+
+    .score-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      opacity: 0.8;
+      margin-bottom: 2px;
+    }
+
+    .score-display {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      color: #ffffff;
+    }
+
+    .score-max {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-subtle);
+    }
+
+    /* Meter bar */
+    .meter-container {
+      margin-bottom: 24px;
+    }
+
+    .meter-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .meter-track {
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .meter-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s;
+    }
+
+    /* Meta Info */
+    .url-summary {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      word-break: break-all;
+    }
+
+    .url-summary-label {
+      color: var(--text-subtle);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .url-summary-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+
+    /* Flags Reasoning Section */
+    .reasoning-section h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+    }
+
+    .flags-count-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+    }
+
+    .flags-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .flag-card {
+      background: #151d2f;
+      border: 1px solid #243048;
+      border-left: 4px solid #f97316;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 0.1s ease;
+    }
+
+    .flag-card:hover {
+      background: #192338;
+    }
+
+    .flag-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .flag-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(249, 115, 22, 0.15);
+      color: #fb923c;
+      border: 1px solid rgba(249, 115, 22, 0.3);
+    }
+
+    .flag-weight {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .flag-detail {
+      font-size: 14px;
+      color: #e5e7eb;
+      line-height: 1.45;
+    }
+
+    .empty-flags {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      color: #6ee7b7;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #ffffff;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .check-btn.loading .spinner {
+      display: inline-block;
+    }
+
+    .check-btn.loading .btn-text {
+      display: none;
+    }
+
+    .check-btn.loading .btn-loading-text {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-loading-text {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <div class="header-badge">Security Heuristics</div>
+      <h1>URL Safety Checker</h1>
+      <p>Analyze links in real-time to detect suspicious patterns, phishing signs, and calculate a risk score.</p>
+    </header>
+
+    <main class="card">
+      <form id="checkForm" class="form-group" onsubmit="handleCheck(event)">
+        <div class="input-row">
+          <div class="url-input-wrapper">
+            <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+            </svg>
+            <input 
+              type="text" 
+              id="urlInput" 
+              class="url-input" 
+              placeholder="Enter URL to check (e.g. https://example.com)" 
+              required 
+              autocomplete="off" 
+              spellcheck="false"
+              autofocus
+            />
+          </div>
+          <button type="submit" id="checkBtn" class="check-btn">
+            <span class="btn-text">Check</span>
+            <span class="btn-loading-text">
+              <span class="spinner" aria-hidden="true"></span> Checking...
+            </span>
+          </button>
+        </div>
+
+        <div class="quick-samples">
+          <span class="quick-samples-label">Quick test:</span>
+          <button type="button" class="sample-chip" onclick="setSample('https://google.com')">Safe (Google)</button>
+          <button type="button" class="sample-chip" onclick="setSample('http://paypa1-security-update.com/login?ref=banking')">Phishing (PayPal spoof)</button>
+          <button type="button" class="sample-chip" onclick="setSample('http://192.168.1.1/admin/signin')">Raw IP / Insecure</button>
+          <button type="button" class="sample-chip" onclick="setSample('http://suspicious-download.xyz/update.exe')">Executable Link</button>
+        </div>
+
+        <div id="alertBox" class="alert alert-error" role="alert">
+          <svg style="width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span id="alertMessage"></span>
+        </div>
+      </form>
+    </main>
+
+    <!-- Results Section -->
+    <section id="resultSection" class="card result-section" aria-live="polite">
+      <!-- Binary Verdict Banner -->
+      <div id="verdictBanner" class="verdict-banner safe">
+        <div class="verdict-info">
+          <div id="verdictIcon" class="verdict-icon">
+            <!-- Dynamic SVG icon -->
+          </div>
+          <div class="verdict-label-wrap">
+            <h3>Verdict</h3>
+            <div id="binaryVerdict" class="verdict-badge-text">SAFE</div>
+          </div>
+        </div>
+
+        <div class="score-box">
+          <div class="score-label">Risk Score</div>
+          <div class="score-display">
+            <span id="scoreValue">0</span>
+            <span id="scoreMax" class="score-max">/ 261</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meter Bar -->
+      <div class="meter-container">
+        <div class="meter-header">
+          <span>Heuristic Risk Meter</span>
+          <span id="scoreMeterText">Low Risk</span>
+        </div>
+        <div class="meter-track">
+          <div id="meterFill" class="meter-fill" style="width: 0%; background-color: #10b981;"></div>
+        </div>
+      </div>
+
+      <!-- Normalized URL -->
+      <div class="url-summary">
+        <span class="url-summary-label">Target URL Analyzed</span>
+        <span id="normalizedUrl" class="url-summary-value">-</span>
+      </div>
+
+      <!-- Reasoning / Flags List -->
+      <div class="reasoning-section">
+        <h2>
+          <span>Reasoning &amp; Detected Flags</span>
+          <span id="flagsCountBadge" class="flags-count-badge">0 flags</span>
+        </h2>
+        <ul id="flagsList" class="flags-list">
+          <!-- Dynamically populated -->
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3000/api/check';
+
+    const urlInput = document.getElementById('urlInput');
+    const checkBtn = document.getElementById('checkBtn');
+    const alertBox = document.getElementById('alertBox');
+    const alertMessage = document.getElementById('alertMessage');
+    const resultSection = document.getElementById('resultSection');
+    
+    const verdictBanner = document.getElementById('verdictBanner');
+    const verdictIcon = document.getElementById('verdictIcon');
+    const binaryVerdict = document.getElementById('binaryVerdict');
+    const scoreValue = document.getElementById('scoreValue');
+    const scoreMax = document.getElementById('scoreMax');
+    const meterFill = document.getElementById('meterFill');
+    const scoreMeterText = document.getElementById('scoreMeterText');
+    const normalizedUrl = document.getElementById('normalizedUrl');
+    const flagsCountBadge = document.getElementById('flagsCountBadge');
+    const flagsList = document.getElementById('flagsList');
+
+    const SAFE_ICON = `
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+      </svg>
+    `;
+
+    const SUSPICIOUS_ICON = `
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+      </svg>
+    `;
+
+    function setSample(url) {
+      urlInput.value = url;
+      urlInput.focus();
+      handleCheck();
+    }
+
+    function showAlert(msg) {
+      alertMessage.textContent = msg;
+      alertBox.classList.add('visible');
+    }
+
+    function clearAlert() {
+      alertBox.classList.remove('visible');
+      alertMessage.textContent = '';
+    }
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        checkBtn.disabled = true;
+        checkBtn.classList.add('loading');
+        clearAlert();
+      } else {
+        checkBtn.disabled = false;
+        checkBtn.classList.remove('loading');
+      }
+    }
+
+    async function handleCheck(event) {
+      if (event) event.preventDefault();
+
+      const rawInput = urlInput.value.trim();
+      if (!rawInput) {
+        showAlert('Please enter a URL to check.');
+        urlInput.focus();
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const encodedUrl = encodeURIComponent(rawInput);
+        const endpoint = `${API_BASE}?url=${encodedUrl}`;
+        
+        const response = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          const errMsg = (data && data.error) ? data.error : `Server returned error (${response.status})`;
+          showAlert(errMsg);
+          resultSection.classList.remove('visible');
+          return;
+        }
+
+        if (!data || !data.ok) {
+          showAlert((data && data.error) || 'Invalid response from URL checker.');
+          resultSection.classList.remove('visible');
+          return;
+        }
+
+        renderResult(data);
+      } catch (err) {
+        console.error('Request error:', err);
+        showAlert(`Failed to reach ${API_BASE}. Ensure the backend server is running on port 3000.`);
+        resultSection.classList.remove('visible');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function renderResult(data) {
+      const isSafe = (data.binaryVerdict || '').toLowerCase() === 'safe';
+      const verdict = data.binaryVerdict || (data.score >= 26 ? 'suspicious' : 'safe');
+      const maxScore = data.maxPossibleScore || 261;
+      const score = typeof data.score === 'number' ? data.score : 0;
+      const flags = Array.isArray(data.flags) ? data.flags : [];
+
+      // Verdict Banner
+      verdictBanner.className = `verdict-banner ${isSafe ? 'safe' : 'suspicious'}`;
+      verdictIcon.innerHTML = isSafe ? SAFE_ICON : SUSPICIOUS_ICON;
+      binaryVerdict.textContent = verdict.toUpperCase();
+
+      // Score Value
+      scoreValue.textContent = score;
+      scoreMax.textContent = `/ ${maxScore}`;
+
+      // Meter Bar calculation (clamped between 3% and 100% for visibility)
+      const pct = Math.min(100, Math.max(isSafe && score === 0 ? 0 : 5, Math.round((score / maxScore) * 100)));
+      meterFill.style.width = `${pct}%`;
+
+      if (isSafe) {
+        meterFill.style.backgroundColor = '#10b981';
+        scoreMeterText.textContent = 'Safe / Low Risk';
+        scoreMeterText.style.color = '#34d399';
+      } else if (score >= 61) {
+        meterFill.style.backgroundColor = '#ef4444';
+        scoreMeterText.textContent = 'High Risk';
+        scoreMeterText.style.color = '#f87171';
+      } else {
+        meterFill.style.backgroundColor = '#f97316';
+        scoreMeterText.textContent = 'Suspicious';
+        scoreMeterText.style.color = '#fb923c';
+      }
+
+      // Normalized URL
+      normalizedUrl.textContent = data.normalizedUrl || data.input || urlInput.value;
+
+      // Flags & Reasoning
+      flagsCountBadge.textContent = `${flags.length} ${flags.length === 1 ? 'flag' : 'flags'}`;
+      flagsList.innerHTML = '';
+
+      if (flags.length === 0) {
+        const emptyItem = document.createElement('div');
+        emptyItem.className = 'empty-flags';
+        emptyItem.innerHTML = `
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          No warning flags detected. This URL did not trigger any suspicious heuristic rules.
+        `;
+        flagsList.appendChild(emptyItem);
+      } else {
+        flags.forEach(flag => {
+          const li = document.createElement('li');
+          li.className = 'flag-card';
+
+          const flagCode = typeof flag === 'object' && flag.code ? flag.code : 'FLAG';
+          const flagWeight = typeof flag === 'object' && typeof flag.weight === 'number' ? `+${flag.weight} risk pts` : '';
+          const flagDetail = typeof flag === 'object' && flag.detail ? flag.detail : (typeof flag === 'string' ? flag : JSON.stringify(flag));
+
+          li.innerHTML = `
+            <div class="flag-top">
+              <span class="flag-code">${escapeHtml(flagCode)}</span>
+              ${flagWeight ? `<span class="flag-weight">${escapeHtml(flagWeight)}</span>` : ''}
+            </div>
+            <div class="flag-detail">${escapeHtml(flagDetail)}</div>
+          `;
+          flagsList.appendChild(li);
+        });
+      }
+
+      resultSection.classList.add('visible');
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function escapeHtml(str) {
+      if (typeof str !== 'string') return String(str);
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
 </body>
 </html>

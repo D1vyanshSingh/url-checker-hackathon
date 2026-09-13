@@ -109,7 +109,34 @@ async function unitTests() {
     assert.ok(r.urlParts.isShortener);
     assert.ok(!codes.includes('SUSPICIOUS_TLD'));
     assert.ok(!codes.includes('BRAND_OUTSIDE_DOMAIN'));
-    assert.strictEqual(r.verdict, 'safe'); // https shortener alone is not flagged hard
+    assert.strictEqual(r.verdict, 'suspicious'); // opaque token path -> cannot inspect
+  });
+
+  await test('regression: 2no.co IP-grabber link is high-risk', () => {
+    const r = analyzeUrl('https://2no.co/2lAQX4');
+    const codes = r.flags.map((f) => f.code);
+    assert.ok(codes.includes('IP_GRABBER'), JSON.stringify(r.flags));
+    assert.ok(codes.includes('OPAQUE_SHORT_LINK'));
+    assert.strictEqual(r.verdict, 'high-risk');
+    assert.strictEqual(r.binaryVerdict, 'suspicious');
+    assert.strictEqual(r.score, 65);
+  });
+
+  await test('grabify.link is flagged as IP grabber', () => {
+    const r = analyzeUrl('https://grabify.link/TRACKID');
+    assert.ok(r.flags.some((f) => f.code === 'IP_GRABBER'));
+    assert.ok(r.urlParts.isIpGrabber);
+  });
+
+  await test('grabber domain with normal-length path still flags IP_GRABBER', () => {
+    const r = analyzeUrl('https://iplogger.org/faq');
+    assert.ok(r.flags.some((f) => f.code === 'IP_GRABBER'));
+    assert.ok(!r.flags.some((f) => f.code === 'OPAQUE_SHORT_LINK'));
+  });
+
+  await test('normal site with opaque-looking path is not flagged as shortener', () => {
+    const r = analyzeUrl('https://youtube.com/watch\u002Fdef456');
+    assert.ok(!r.flags.some((f) => f.code === 'OPAQUE_SHORT_LINK'));
   });
 
   await test('many subdomains flag MANY_SUBDOMAINS', () => {

@@ -33,6 +33,10 @@ const WEIGHTS = {
   VERY_LONG_URL: 12,
   MANY_HYPHENS: 8,
   EXECUTABLE_EXT: 25,
+
+  // Known malicious services / uninspectable links
+  IP_GRABBER: 45,
+  OPAQUE_SHORT_LINK: 20,
 };
 
 const SUSPICIOUS_TLDS = new Set([
@@ -63,6 +67,20 @@ const URL_SHORTENERS = new Set([
   'cutt.ly', 'rb.gy', 'shorturl.at', 'tiny.cc', 'rebrand.ly', 's.id',
   'shorte.st', 'adf.ly', 'bit.do', 'urls.im', 'v.gd',
 ]);
+
+// IP-logging / "IP grabber" services: the link itself is the attack —
+// opening it records the visitor's IP and device data.
+const IP_GRABBER_DOMAINS = new Set([
+  'iplogger.org', 'iplogger.com', 'iplogger.ru', '2no.co', 'yip.su',
+  'ipgrab.org', 'ipgraber.ru', 'grabify.link', 'grabify.org',
+  'blasze.com', 'blasze.tk', 'canarytokens.org', 'ip.su',
+  'iplogger.co', 'iplogger.info', 'ip-tracker.org', 'whatstheirip.com',
+  'leak.sx', 'ps3cfw.com', 'urlx.pro', 'grabify.com',
+]);
+
+// Shorteners whose paths are pure opaque tokens (no readable slug),
+// e.g. bit.ly/3xYzAbc — the destination cannot be inspected without expanding.
+const OPAQUE_PATH_RE = /^\/[0-9a-zA-Z]{4,20}$/;
 
 const SUSPICIOUS_REDIRECT_PARAMS = new Set([
   'url', 'next', 'redirect', 'redirect_uri', 'redirect_url', 'goto',
@@ -165,8 +183,15 @@ function analyzeUrl(raw) {
     addFlag('NO_HTTPS', 'Connection is not encrypted (no HTTPS).');
   }
 
-  /* -------- shorteners -------- */
+  /* -------- shorteners / grabbers -------- */
   const isShortener = URL_SHORTENERS.has(domain);
+  const isIpGrabber = IP_GRABBER_DOMAINS.has(domain);
+  if (isIpGrabber) {
+    addFlag('IP_GRABBER', `"${domain}" is a known IP-logging ("IP grabber") service — opening the link records visitor data.`);
+  }
+  if ((isShortener || isIpGrabber) && OPAQUE_PATH_RE.test(path)) {
+    addFlag('OPAQUE_SHORT_LINK', 'Opaque shortened link — the real destination cannot be inspected. Expand it first (e.g. checkshorturl.com).');
+  }
 
   /* -------- domain shape -------- */
   const isIpHost = isIpv4Host(hostname);
@@ -265,7 +290,8 @@ function analyzeUrl(raw) {
 
   /* -------- score + verdict -------- */
   const score = flags.reduce((sum, f) => sum + f.weight, 0);
-  const verdict = score >= 61 ? 'high-risk' : score >= 26 ? 'suspicious' : 'safe';
+  // 20 sits at OPAQUE_SHORT_LINK (20): an uninspectable link must not show as green.
+  const verdict = score >= 61 ? 'high-risk' : score >= 20 ? 'suspicious' : 'safe';
 
   return {
     ok: true,
@@ -283,6 +309,7 @@ function analyzeUrl(raw) {
       tld: isIpHost ? '' : tld,
       path,
       isShortener,
+      isIpGrabber,
     },
   };
 }
